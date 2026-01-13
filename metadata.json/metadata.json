@@ -1,0 +1,9 @@
+
+{
+  "name": "MindQuest AI",
+  "description": "Một trò chơi học tập tương tác sử dụng AI để tạo lộ trình học tập, câu đố và hình ảnh minh họa sống động cho mọi chủ đề.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
