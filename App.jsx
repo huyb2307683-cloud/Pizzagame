@@ -13,14 +13,14 @@ const PepperoniSet = () => (
   </>
 );
 
-// SỬA LỖI HIỂN THỊ: Sử dụng maskImage thay vì clipPath để tạo lát cắt tam giác
+// Thành phần vẽ bánh pizza với Mask để tạo lát cắt tam giác
 const PizzaRender = ({ mask, isSlice }) => {
   return (
     <div 
       className={`pizza-body transition-all duration-300 ${isSlice ? 'hover:brightness-110 cursor-grab' : ''}`}
       style={{ 
-        WebkitMaskImage: mask, // Dành cho Chrome/Safari
-        maskImage: mask,       // Dành cho các trình duyệt khác
+        WebkitMaskImage: mask, 
+        maskImage: mask,
         width: '100%', 
         height: '100%', 
         background: '#ffa500', 
@@ -157,7 +157,7 @@ const App = () => {
     const totalValueInZone = cakesInZone.reduce((acc, cake) => acc + (cake.isSlice ? (1 / cake.slices) : 1.0), 0);
     const expectedValue = currentLevel.totalCakes / currentLevel.shareWith;
     if (Math.abs(totalValueInZone - expectedValue) > 0.001) {
-      alert("Số lượng bánh trong đĩa chưa đúng!");
+      alert("Số lượng bánh chưa đúng!");
       setFeedback('wrong');
       setTimeout(() => setFeedback(null), 1000);
       return;
@@ -218,10 +218,7 @@ const App = () => {
             }}
           >
             <div className="pizza-content">
-              {!cake.isSlice ? 
-                <PizzaRender /> : 
-                <PizzaRender isSlice mask={`conic-gradient(from ${cake.startAngle}deg, black ${360/cake.slices}deg, transparent 0deg)`} />
-              }
+              {!cake.isSlice ? <PizzaRender /> : <PizzaRender isSlice mask={`conic-gradient(from ${cake.startAngle}deg, black ${360/cake.slices}deg, transparent 0deg)`} />}
             </div>
           </div>
         ))}
@@ -230,15 +227,36 @@ const App = () => {
           <div className="absolute pointer-events-none text-7xl z-[180] transition-transform duration-75" style={{ left: knifePos.x, top: knifePos.y, transform: 'translate(-50%, -50%) rotate(-45deg)' }}>🔪</div>
         )}
 
+        {/* PHẦN ĐÃ ĐƯỢC CĂN CHỈNH ĐỀU CẢ 2 PHẦN (TEXT VÀ INPUT) */}
         {cutMenu.active && (
-          <div className="absolute z-[120] bg-white p-6 rounded-[40px] shadow-2xl border-4 border-rose-500 flex flex-col items-center gap-4 max-w-[250px]"
-            style={{ left: placedCakes.find(c => c.id === cutMenu.pizzaId)?.x + 100, top: placedCakes.find(c => c.id === cutMenu.pizzaId)?.y - 120 }}>
-            <p className="text-rose-900 text-xl font-bold text-center leading-tight">Bạn muốn cắt chiếc bánh thành mấy phần?</p>
-            <input type="number" autoFocus placeholder="?" value={cutMenu.den} onChange={(e) => setCutMenu({ ...cutMenu, den: e.target.value })}
-                className="w-18 h-18 border-4 border-rose-400 rounded-2xl text-center text-4xl outline-none" />
-            <div className="flex gap-3 w-full">
-              <button onClick={() => { setCutMenu({ active: false, pizzaId: null, den: '' }); setKnifePos({ ...knifePos, active: false }); }} className="flex-1 bg-slate-100 px-4 py-2 rounded-xl font-bold text-slate-500">HỦY</button>
-              <button onClick={executeCut} className="flex-1 bg-rose-500 text-white px-4 py-2 rounded-xl font-bold shadow-md">CẮT</button>
+          <div className="absolute z-[120] bg-white p-8 rounded-[50px] shadow-2xl border-4 border-rose-500 flex flex-col items-center justify-center gap-6 min-w-[300px]"
+            style={{ 
+              left: placedCakes.find(c => c.id === cutMenu.pizzaId)?.x + 110, 
+              top: placedCakes.find(c => c.id === cutMenu.pizzaId)?.y - 140 
+            }}>
+            <p className="text-rose-900 text-xl font-bold text-center leading-snug px-2">
+              Bạn muốn cắt chiếc bánh thành mấy phần?
+            </p>
+            
+            {/* Ô nhập liệu được thiết kế lại để cân đối ở giữa */}
+            <input 
+              type="number" 
+              autoFocus 
+              placeholder="?" 
+              value={cutMenu.den} 
+              onChange={(e) => setCutMenu({ ...cutMenu, den: e.target.value })}
+              className="w-24 h-20 border-4 border-rose-400 rounded-2xl text-center text-4xl outline-none shadow-inner bg-rose-50/30" 
+            />
+            
+            <div className="flex gap-4 w-full">
+              <button onClick={() => { setCutMenu({ active: false, pizzaId: null, den: '' }); setKnifePos({ ...knifePos, active: false }); }} 
+                className="flex-1 bg-slate-100 hover:bg-slate-200 px-4 py-3 rounded-2xl font-bold text-slate-500 transition-colors">
+                HỦY
+              </button>
+              <button onClick={executeCut} 
+                className="flex-1 bg-rose-500 hover:bg-rose-600 text-white px-4 py-3 rounded-2xl font-bold shadow-lg transition-colors">
+                CẮT
+              </button>
             </div>
           </div>
         )}
