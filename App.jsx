@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'; 
 import { generateLevels } from './services/geminiService';
 
+// Thành phần vẽ các lát xúc xích trên mặt bánh
 const PepperoniSet = () => (
   <>
     <div className="pepperoni" style={{ top: '20%', left: '30%' }}></div>
@@ -12,6 +13,7 @@ const PepperoniSet = () => (
   </>
 );
 
+// Thành phần vẽ hình dáng chiếc bánh hoặc miếng bánh
 const PizzaRender = ({ mask, isSlice }) => {
   return (
     <div 
@@ -52,6 +54,7 @@ const App = () => {
 
   const currentLevel = (levels && levels.length > 0) ? levels[currentLevelIdx] : null;
 
+  // Xử lý di chuyển
   const handlePointerMove = (e) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
@@ -109,7 +112,6 @@ const App = () => {
     }
   };
 
-  // SỬA ĐỔI CHÍNH: Tạo lát cắt tam giác tại cùng một tâm bánh
   const executeCut = () => {
     if (!cutMenu.pizzaId) return;
     const targetCake = placedCakes.find(c => c.id === cutMenu.pizzaId);
@@ -122,7 +124,7 @@ const App = () => {
     const sliceAngle = 360 / numSlices;
     const newSlices = Array.from({ length: numSlices }).map((_, i) => ({
       id: Math.random().toString(36).substr(2, 9),
-      x: targetCake.x, // Giữ nguyên tâm để tạo hình bánh tròn ban đầu
+      x: targetCake.x, 
       y: targetCake.y,
       isCut: true,
       slices: numSlices,
@@ -144,14 +146,10 @@ const App = () => {
              cake.y > (targetZone.top - containerRect.top) &&
              cake.y < (targetZone.bottom - containerRect.top);
     });
-    if (cakesInZone.length === 0) {
-      alert("Hãy kéo bánh vào đĩa!");
-      return;
-    }
     const totalValueInZone = cakesInZone.reduce((acc, cake) => acc + (cake.isSlice ? (1 / cake.slices) : 1.0), 0);
     const expectedValue = currentLevel.totalCakes / currentLevel.shareWith;
     if (Math.abs(totalValueInZone - expectedValue) > 0.001) {
-      alert("Số lượng bánh chưa đúng!");
+      alert("Số lượng bánh trong đĩa chưa đúng!");
       setFeedback('wrong');
       setTimeout(() => setFeedback(null), 1000);
       return;
@@ -173,15 +171,15 @@ const App = () => {
           setCurrentLevelIdx(currentLevelIdx + 1);
           setPlacedCakes([]);
           setAnswer({ mode: 'mixed', whole: '', numerator: '', denominator: '' });
-        } else { alert("Tuyệt vời! Bạn đã hoàn thành 10 màn chơi!"); }
+        } else { alert("Tuyệt vời! Bạn đã hoàn thành bài học!"); }
       }, 2000);
     } else { setTimeout(() => setFeedback(null), 1500); }
   };
 
-  if (isLoading) return <div className="flex h-screen items-center justify-center text-5xl agbalumo animate-pulse">🍕 Đang chuẩn bị 10 màn chơi...</div>;
+  if (isLoading) return <div className="flex h-screen items-center justify-center text-5xl agbalumo animate-pulse">🍕 Đang chuẩn bị bàn tiệc...</div>;
 
   return (
-    <div ref={containerRef} className="game-container agbalumo select-none" style={{ touchAction: 'none' }} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp}>
+    <div ref={containerRef} className="game-container agbalumo select-none relative overflow-hidden h-screen w-screen" style={{ touchAction: 'none' }} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp}>
       <div className="bg-white/95 p-6 border-b-4 border-rose-300 flex items-center justify-center text-center z-20 shadow-md">
         <p className="text-2xl md:text-3xl lg:text-4xl text-rose-900 leading-tight">
           <span className="text-rose-500 mr-2">Màn {currentLevelIdx + 1}:</span> 
@@ -191,7 +189,7 @@ const App = () => {
 
       <div ref={workspaceRef} className="workspace" onDragOver={(e) => e.preventDefault()} onDrop={handleWorkspaceDrop}>
         <div ref={targetZoneRef} className="absolute right-10 top-1/2 -translate-y-1/2 w-[320px] h-[460px] border-4 border-dashed border-rose-300 bg-rose-50/30 rounded-[60px] flex flex-col items-center p-8 pointer-events-none">
-          <div className="bg-rose-500 text-white text-[16px] px-5 py-2 rounded-full mb-6 font-bold uppercase tracking-wider">Vùng đáp án</div>
+          <div className="bg-rose-500 text-white text-[16px] px-5 py-2 rounded-full mb-6 font-bold uppercase">Vùng đáp án</div>
           <div className="flex-1 w-full border-8 border-white rounded-full bg-slate-100/50 shadow-inner flex items-center justify-center text-8xl opacity-10">🍽️</div>
         </div>
 
@@ -200,10 +198,8 @@ const App = () => {
             key={cake.id} 
             className="pizza-placed"
             style={{ 
-              left: cake.x - 90, top: cake.y - 90, 
-              width: 180, height: 180, 
-              zIndex: draggingId === cake.id ? 100 : 5,
-              touchAction: 'none'
+              left: cake.x - 90, top: cake.y - 90, width: 180, height: 180, 
+              zIndex: draggingId === cake.id ? 100 : 5, touchAction: 'none'
             }}
             onPointerDown={(e) => {
               if (!knifePos.active) {
@@ -214,22 +210,25 @@ const App = () => {
             }}
           >
             <div className="pizza-content">
-              {!cake.isSlice ? 
-                <PizzaRender /> : 
-                <PizzaRender isSlice mask={`conic-gradient(from ${cake.startAngle}deg, black ${360/cake.slices}deg, transparent 0deg)`} />
-              }
+              {!cake.isSlice ? <PizzaRender /> : <PizzaRender isSlice mask={`conic-gradient(from ${cake.startAngle}deg, black ${360/cake.slices}deg, transparent 0deg)`} />}
             </div>
           </div>
         ))}
 
+        {knifePos.active && (
+          <div className="absolute pointer-events-none text-7xl z-[180] transition-transform duration-75" style={{ left: knifePos.x, top: knifePos.y, transform: 'translate(-50%, -50%) rotate(-45deg)' }}>🔪</div>
+        )}
+
+        {/* THÊM DÒNG CHỮ HƯỚNG DẪN TẠI ĐÂY */}
         {cutMenu.active && (
-          <div className="absolute z-[120] bg-white p-6 rounded-[40px] shadow-2xl border-4 border-rose-500 flex flex-col items-center gap-4"
+          <div className="absolute z-[120] bg-white p-6 rounded-[40px] shadow-2xl border-4 border-rose-500 flex flex-col items-center gap-4 max-w-[250px]"
             style={{ left: placedCakes.find(c => c.id === cutMenu.pizzaId)?.x + 100, top: placedCakes.find(c => c.id === cutMenu.pizzaId)?.y - 120 }}>
+            <p className="text-rose-900 text-xl font-bold text-center leading-tight">Bạn muốn cắt chiếc bánh thành mấy phần?</p>
             <input type="number" autoFocus placeholder="?" value={cutMenu.den} onChange={(e) => setCutMenu({ ...cutMenu, den: e.target.value })}
                 className="w-18 h-18 border-4 border-rose-400 rounded-2xl text-center text-4xl outline-none" />
-            <div className="flex gap-3">
-              <button onClick={() => setCutMenu({ active: false, pizzaId: null, den: '' })} className="bg-slate-100 px-4 py-2 rounded-xl">HỦY</button>
-              <button onClick={executeCut} className="bg-rose-500 text-white px-4 py-2 rounded-xl">CẮT</button>
+            <div className="flex gap-3 w-full">
+              <button onClick={() => { setCutMenu({ active: false, pizzaId: null, den: '' }); setKnifePos({ ...knifePos, active: false }); }} className="flex-1 bg-slate-100 px-4 py-2 rounded-xl font-bold text-slate-500">HỦY</button>
+              <button onClick={executeCut} className="flex-1 bg-rose-500 text-white px-4 py-2 rounded-xl font-bold shadow-md">CẮT</button>
             </div>
           </div>
         )}
@@ -244,16 +243,16 @@ const App = () => {
         <div className="flex flex-col items-center p-4">
           <p className="mb-2 text-xl text-rose-800 font-bold">🔪 Dùng Dao</p>
           <div onPointerDown={(e) => { const rect = containerRef.current.getBoundingClientRect(); setKnifePos({ x: e.clientX - rect.left, y: e.clientY - rect.top, active: true }); }}
-            className={`w-20 h-20 bg-white border-4 rounded-full flex items-center justify-center text-5xl shadow-xl ${knifePos.active ? 'border-rose-600 bg-rose-100' : 'border-rose-300'}`}>🔪</div>
+            className={`w-20 h-20 bg-white border-4 rounded-full flex items-center justify-center text-5xl shadow-xl active:scale-95 ${knifePos.active ? 'border-rose-600 bg-rose-100' : 'border-rose-300'}`}>🔪</div>
         </div>
       </div>
 
       {isInputOpen && (
         <div className="fixed inset-0 z-[150] flex items-center justify-center backdrop-blur-sm bg-black/20">
           <div className="input-popup w-[500px] p-12 flex flex-col items-center">
-            <h2 className="text-3xl mb-8 text-rose-900 font-bold">Nhập kết quả (Hỗn số)</h2>
+            <h2 className="text-3xl mb-8 text-rose-900 font-bold">Mỗi người nhận được?</h2>
             <div className="flex items-center gap-6 mb-10">
-              <input className="w-20 h-28 border-4 border-black rounded-2xl text-center text-5xl outline-none" placeholder="0" type="number" value={answer.whole} onChange={(e) => setAnswer({ ...answer, whole: e.target.value })} />
+              <input className="w-20 h-28 border-4 border-black rounded-2xl text-center text-5xl outline-none agbalumo" placeholder="0" type="number" value={answer.whole} onChange={(e) => setAnswer({ ...answer, whole: e.target.value })} />
               <div className="flex flex-col items-center gap-2">
                 <input className="w-16 h-16 border-4 border-black rounded-xl text-center text-2xl" placeholder="?" type="number" value={answer.numerator} onChange={(e) => setAnswer({ ...answer, numerator: e.target.value })} />
                 <div className="w-20 h-1.5 bg-black rounded-full" />
@@ -266,7 +265,7 @@ const App = () => {
       )}
 
       {feedback && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30">
           <div className={`p-16 rounded-[60px] bg-white shadow-2xl border-8 ${feedback === 'correct' ? 'border-green-500' : 'border-red-500'}`}>
              <div className="text-9xl">{feedback === 'correct' ? '✅' : '❌'}</div>
           </div>
