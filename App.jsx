@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'; 
 import { generateLevels } from './services/geminiService';
 
-// Thành phần vẽ các lát xúc xích trên mặt bánh
+// Vẽ xúc xích trên mặt bánh
 const PepperoniSet = () => (
   <>
     <div className="pepperoni" style={{ top: '20%', left: '30%' }}></div>
@@ -13,12 +13,21 @@ const PepperoniSet = () => (
   </>
 );
 
-// Thành phần vẽ hình dáng chiếc bánh hoặc miếng bánh
+// SỬA LỖI HIỂN THỊ: Sử dụng maskImage thay vì clipPath để tạo lát cắt tam giác
 const PizzaRender = ({ mask, isSlice }) => {
   return (
     <div 
-      className={`pizza-body transition-all duration-300 ${isSlice ? 'hover:brightness-110' : ''}`}
-      style={{ clipPath: mask, width: '100%', height: '100%', background: '#ffa500', borderRadius: '50%', position: 'relative', overflow: 'hidden' }}
+      className={`pizza-body transition-all duration-300 ${isSlice ? 'hover:brightness-110 cursor-grab' : ''}`}
+      style={{ 
+        WebkitMaskImage: mask, // Dành cho Chrome/Safari
+        maskImage: mask,       // Dành cho các trình duyệt khác
+        width: '100%', 
+        height: '100%', 
+        background: '#ffa500', 
+        borderRadius: '50%', 
+        position: 'relative', 
+        overflow: 'hidden' 
+      }}
     >
       <div className="pizza-cheese" style={{ position: 'absolute', inset: '10px', background: '#ffd700', borderRadius: '50%' }} />
       <PepperoniSet />
@@ -54,7 +63,6 @@ const App = () => {
 
   const currentLevel = (levels && levels.length > 0) ? levels[currentLevelIdx] : null;
 
-  // Xử lý di chuyển
   const handlePointerMove = (e) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
@@ -210,7 +218,10 @@ const App = () => {
             }}
           >
             <div className="pizza-content">
-              {!cake.isSlice ? <PizzaRender /> : <PizzaRender isSlice mask={`conic-gradient(from ${cake.startAngle}deg, black ${360/cake.slices}deg, transparent 0deg)`} />}
+              {!cake.isSlice ? 
+                <PizzaRender /> : 
+                <PizzaRender isSlice mask={`conic-gradient(from ${cake.startAngle}deg, black ${360/cake.slices}deg, transparent 0deg)`} />
+              }
             </div>
           </div>
         ))}
@@ -219,7 +230,6 @@ const App = () => {
           <div className="absolute pointer-events-none text-7xl z-[180] transition-transform duration-75" style={{ left: knifePos.x, top: knifePos.y, transform: 'translate(-50%, -50%) rotate(-45deg)' }}>🔪</div>
         )}
 
-        {/* THÊM DÒNG CHỮ HƯỚNG DẪN TẠI ĐÂY */}
         {cutMenu.active && (
           <div className="absolute z-[120] bg-white p-6 rounded-[40px] shadow-2xl border-4 border-rose-500 flex flex-col items-center gap-4 max-w-[250px]"
             style={{ left: placedCakes.find(c => c.id === cutMenu.pizzaId)?.x + 100, top: placedCakes.find(c => c.id === cutMenu.pizzaId)?.y - 120 }}>
